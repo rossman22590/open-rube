@@ -6,6 +6,8 @@ import { RubeGraphic } from './components/RubeGraphic';
 import { Navigation } from './components/Navigation';
 import { ChatPage } from './components/ChatPageWithAuth';
 import { AppsPage } from './components/AppsPageWithAuth';
+import { ActivityLogs } from './components/ActivityLogs';
+import { Settings } from './components/Settings';
 import { AuthWrapper } from './components/AuthWrapper';
 import { UserMenu } from './components/UserMenu';
 
@@ -27,27 +29,9 @@ function HomeContent() {
       case 'apps':
         return <AppsPage />;
       case 'activity':
-        return (
-          <div className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Activity Logs</h1>
-              <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-gray-500">Your activity logs will appear here.</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <ActivityLogs />;
       case 'settings':
-        return (
-          <div className="flex-1 p-6">
-            <div className="max-w-6xl mx-auto">
-              <h1 className="text-2xl font-semibold text-gray-900 mb-6">Settings</h1>
-              <div className="bg-white rounded-lg shadow p-6">
-                <p className="text-gray-500">Settings options will appear here.</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <Settings />;
       default:
         return <ChatPage />;
     }
@@ -57,11 +41,11 @@ function HomeContent() {
     <AuthWrapper>
       {(user, loading) => (
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#fcfaf9' }}>
-          <header className="bg-white border-b border-gray-200">
+          <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
             <div className="flex items-center justify-between px-6 py-4">
               <div className="flex items-center space-x-3 text-black">
                 <RubeGraphic />
-                <span className="text-xl font-semibold text-gray-900">Rube</span>
+                <span className="text-xl font-semibold text-gray-900">MCP Chat</span>
               </div>
               {user && <UserMenu user={user} />}
             </div>

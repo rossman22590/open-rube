@@ -27,7 +27,7 @@ export default function AuthPage() {
             <RubeGraphic className="h-20 w-20 text-gray-800" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">
-            Sign in to Rube by Composio
+            Sign in to MCP Chat by Machine
           </h2>
         </div>
 

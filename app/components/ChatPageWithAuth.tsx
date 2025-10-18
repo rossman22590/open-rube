@@ -181,14 +181,14 @@ function ChatPageContent({ user }: { user: User }) {
   return (
     <div className="flex-1 flex relative" style={{ backgroundColor: '#fcfaf9' }}>
       {/* Sidebar */}
-      <div className={`fixed left-0 top-[120px] h-full w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-50 ${
+      <div className={`fixed left-0 top-0 h-screen w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out z-40 flex flex-col pt-[120px] ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">Chat History</h2>
         </div>
         
-        <div className="p-4">
+        <div className="p-4 flex-shrink-0">
           <button 
             onClick={startNewChat}
             className="w-full flex items-center gap-2 p-3 text-left hover:bg-gray-50 rounded-lg border border-gray-200 mb-3"
@@ -213,7 +213,7 @@ function ChatPageContent({ user }: { user: User }) {
           </div>
         </div>
         
-        <div className="px-4">
+        <div className="flex-1 overflow-y-auto px-4">
           {conversations.length > 0 ? (
             <div className="mb-4">
               <p className="text-xs font-medium text-gray-500 mb-2">Recent</p>
@@ -457,10 +457,10 @@ function ChatPageContent({ user }: { user: User }) {
                 
                 {isLoading && !currentStreamingId && (
                   <div className="flex justify-start">
-                    <div className="rounded-lg p-3" style={{ backgroundColor: '#fcfaf9' }}>
+                    <div className="rounded-lg p-2" style={{ backgroundColor: '#fcfaf9' }}>
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 animate-pulse">
-                          <RubeGraphic />
+                        <div className="w-5 h-5 animate-pulse">
+                          <RubeGraphic className="w-5 h-5" />
                         </div>
                         <div className="flex items-center gap-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>

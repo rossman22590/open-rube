@@ -14,7 +14,7 @@ const flecha = Crimson_Text({
 });
 
 export const metadata: Metadata = {
-  title: "Rube",
+  title: "MCP Chat",
   description: "Get something done today",
 };
 

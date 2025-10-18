@@ -18,9 +18,9 @@ export function MessageInput({
   isLoading 
 }: MessageInputProps) {
   const placeholderSuggestions = [
-    "Hey Rube, can you fetch my emails",
-    "Hey Rube, can you search my twitter",
-    "Hey Rube, can you fetch the reddit posts in r/localllama"
+    "Hey Machine, can you fetch my emails",
+    "Hey Machine, can you search my twitter",
+    "Hey Machine, can you fetch the reddit posts in r/localllama"
   ];
 
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
