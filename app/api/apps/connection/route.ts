@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/app/utils/supabase/server';
 import { getComposio } from '../../../utils/composio';
 
+function decodeJwtEmail(idToken?: string): string | undefined {
+  try {
+    if (!idToken) return undefined;
+    const parts = idToken.split('.');
+    if (parts.length < 2) return undefined;
+    const payload = parts[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const decoded = Buffer.from(payload, 'base64').toString('utf-8');
+    const json = JSON.parse(decoded);
+    return json?.email as string | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // GET: Check connection status for all toolkits for authenticated user
 export async function GET(request: NextRequest) {
   try {
@@ -44,8 +60,24 @@ export async function GET(request: NextRequest) {
         }
       })
     );
-    
-    return NextResponse.json({ connectedAccounts: detailedAccounts });
+
+    // Sanitize and enrich response: expose only safe fields and derive email
+    const safeAccounts = (detailedAccounts || []).map((a: any) => {
+      const idToken = a?.state?.val?.id_token || a?.data?.id_token;
+      const emailFromToken = decodeJwtEmail(idToken);
+      return {
+        id: a?.id,
+        status: a?.status,
+        createdAt: a?.createdAt,
+        updatedAt: a?.updatedAt,
+        userId: a?.userId,
+        email: emailFromToken || a?.email, // prefer derived email, fallback to field if present
+        toolkit: { slug: a?.toolkit?.slug },
+        authConfig: { id: a?.authConfig?.id },
+      };
+    });
+
+    return NextResponse.json({ connectedAccounts: safeAccounts });
   } catch (error) {
     console.error('Error fetching connection status:', error);
     return NextResponse.json(
