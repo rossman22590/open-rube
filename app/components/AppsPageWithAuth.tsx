@@ -41,12 +41,28 @@ interface ConnectedAccount {
 
 function AppsPageContent({ user }: { user: User }) {
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
+  const [toolkitLogos, setToolkitLogos] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [connecting, setConnecting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConnectedAccounts();
+    // Also fetch toolkit metadata (logos) once
+    (async () => {
+      try {
+        const res = await fetch('/api/toolkits');
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+          const map: Record<string, string> = {};
+          for (const tk of items) {
+            if (tk?.slug && tk?.meta?.logo) map[tk.slug.toLowerCase()] = tk.meta.logo;
+          }
+          setToolkitLogos(map);
+        }
+      } catch {}
+    })();
   }, []);
 
   // Refresh connection data when component mounts (e.g., after OAuth callback)
@@ -173,10 +189,33 @@ function AppsPageContent({ user }: { user: User }) {
                   .map((account) => (
                     <div key={account.id} className="p-3 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-stone-50 transition-colors gap-3 sm:gap-0">
                       <div className="flex items-start sm:items-center gap-2.5 sm:gap-4 min-w-0 flex-1">
-                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0">
-                          <span className="text-orange-500 text-sm sm:text-lg font-semibold">
-                            {getInitial(account.toolkit?.slug || 'App')}
-                          </span>
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-white border border-gray-200 rounded-md sm:rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                          {(() => {
+                            const slug = (account.toolkit?.slug || 'app').toLowerCase();
+                            const logo = toolkitLogos[slug];
+                            return logo ? (
+                              <img
+                                src={logo}
+                                alt={account.toolkit?.slug || 'App'}
+                                className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
+                                onError={(e) => {
+                                  const img = e.target as HTMLImageElement;
+                                  img.style.display = 'none';
+                                  const fallback = img.nextElementSibling as HTMLSpanElement | null;
+                                  if (fallback) fallback.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null;
+                          })()}
+                          {(() => {
+                            const slug = (account.toolkit?.slug || '').toLowerCase();
+                            const hasLogo = !!toolkitLogos[slug];
+                            return (
+                              <span className={`text-orange-500 text-sm sm:text-lg font-semibold ${hasLogo ? 'hidden' : ''}`}>
+                                {getInitial(account.toolkit?.slug || 'App')}
+                              </span>
+                            );
+                          })()}
                         </div>
                         <div className="min-w-0 flex-1">
                           <h3 className="text-sm sm:text-lg font-semibold text-neutral-900 mb-0.5 sm:mb-1">
@@ -185,6 +224,9 @@ function AppsPageContent({ user }: { user: User }) {
                           <p className="text-neutral-600 text-xs sm:text-sm leading-relaxed break-words">
                             Status: {account.status || 'ACTIVE'} • {account.email ? `Account: ${account.email}` : 'Connected'}
                           </p>
+                          {account.status && account.status !== 'ACTIVE' && (
+                            <p className="text-xs text-amber-600 mt-0.5">Pending activation — refresh after a few seconds.</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex-shrink-0 self-start sm:self-center">

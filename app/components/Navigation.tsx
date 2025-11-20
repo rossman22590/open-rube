@@ -10,6 +10,7 @@ interface NavigationProps {
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const tabs = [
     { id: 'chat', label: 'Chat' },
+    { id: 'marketplace', label: 'Marketplace' },
     { id: 'apps', label: 'Apps' },
     { id: 'activity', label: 'Activity Logs' },
     { id: 'settings', label: 'Settings' },
