@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Attempt credential-based link using the same link API with credentials payload (supported by Composio for non-OAuth schemes).
-    const res = await composio.connectedAccounts.link(user.email, authConfigId, { credentials: normalized });
+    const linkOptions: { callbackUrl?: string } & Record<string, unknown> = { credentials: normalized };
+    const res = await composio.connectedAccounts.link(user.email, authConfigId, linkOptions);
 
     return NextResponse.json({ success: true, result: res });
   } catch (error) {

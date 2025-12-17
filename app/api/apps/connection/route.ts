@@ -18,8 +18,21 @@ function decodeJwtEmail(idToken?: string): string | undefined {
   }
 }
 
+type ConnectionDetails = {
+  id?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  userId?: string;
+  email?: string;
+  toolkit?: { slug?: string };
+  authConfig?: { id?: string };
+  state?: { val?: { id_token?: string } };
+  data?: { id_token?: string };
+};
+
 // GET: Check connection status for all toolkits for authenticated user
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createClient();
@@ -42,7 +55,7 @@ export async function GET(request: NextRequest) {
     console.log('Connected accounts for user:', user.email, `(${connectedAccounts.items?.length || 0} accounts)`);
 
     // Get detailed info for each connected account
-    const detailedAccounts = await Promise.all(
+    const detailedAccounts: ConnectionDetails[] = await Promise.all(
       (connectedAccounts.items || []).map(async (account) => {
         try {
           const accountDetails = await composio.connectedAccounts.get(account.id);
@@ -53,16 +66,16 @@ export async function GET(request: NextRequest) {
             authConfigId: accountDetails.authConfig?.id,
             status: accountDetails.status
           });
-          return accountDetails;
+          return accountDetails as ConnectionDetails;
         } catch (error) {
           console.error('Error fetching account details for', account.id, ':', error);
-          return account; // fallback to original if details fetch fails
+          return account as ConnectionDetails; // fallback to original if details fetch fails
         }
       })
     );
 
     // Sanitize and enrich response: expose only safe fields and derive email
-    const safeAccounts = (detailedAccounts || []).map((a: any) => {
+    const safeAccounts = (detailedAccounts || []).map((a) => {
       const idToken = a?.state?.val?.id_token || a?.data?.id_token;
       const emailFromToken = decodeJwtEmail(idToken);
       return {

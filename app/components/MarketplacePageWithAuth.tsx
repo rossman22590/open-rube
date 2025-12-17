@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { AuthWrapper } from "./AuthWrapper";
 import { User } from "@supabase/supabase-js";
@@ -23,6 +24,10 @@ interface AuthConfig {
   id: string;
   name?: string;
   toolkit: string | { slug: string };
+}
+
+interface ConnectionResponse {
+  connectedAccounts?: ConnectedAccount[];
 }
 
 export function MarketplacePageContent({ user }: { user: User }) {
@@ -118,17 +123,23 @@ export function MarketplacePageContent({ user }: { user: User }) {
         tries += 1;
         const rr = await fetch('/api/apps/connection');
         if (rr.ok) {
-          const cc = await rr.json();
-          setConnectedAccounts(cc.connectedAccounts || []);
-          const active = (cc.connectedAccounts || []).some((a: any) => (a.toolkit?.slug || '').toLowerCase() === (credModal.slug || '').toLowerCase() && (a.status === 'ACTIVE'));
+          const cc: ConnectionResponse = await rr.json();
+          const accounts = cc.connectedAccounts || [];
+          setConnectedAccounts(accounts);
+          const active = accounts.some(
+            (account) =>
+              (account.toolkit?.slug || '').toLowerCase() === (credModal.slug || '').toLowerCase() &&
+              account.status === 'ACTIVE'
+          );
           if (active || tries >= 5) return;
           setTimeout(poll, 2000);
         }
       };
       setTimeout(poll, 2000);
       setCredModal({ open: false, slug: null, scheme: null });
-    } catch (e: any) {
-      alert(e?.message || String(e));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert(message);
     } finally {
       setConnectingSlug(null);
     }
@@ -194,8 +205,9 @@ export function MarketplacePageContent({ user }: { user: User }) {
           }
         }, 2000);
       }
-    } catch (e: any) {
-      alert(e?.message || String(e));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      alert(message);
     } finally {
       setConnectingSlug(null);
     }
@@ -236,15 +248,23 @@ export function MarketplacePageContent({ user }: { user: User }) {
             const isConnected = connectedSlugs.has(slugLower) || !!noAuthLocal[slugLower];
             const logo = t.meta?.logo;
             const description = t.meta?.description || "";
-            const canOAuth = !!authConfigBySlug.get(t.slug);
-            const credSchemes = (t.auth_schemes || []).filter((s) => ['API_KEY', 'BEARER_TOKEN', 'BASIC'].includes(s));
             const pending = (connectedAccounts || []).some(a => (a.toolkit?.slug || '').toLowerCase() === slugLower && a.status && a.status !== 'ACTIVE');
             return (
               <div key={t.slug} className="bg-white border border-stone-200 rounded-xl p-4 sm:p-5 hover:shadow-sm transition-shadow flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                     {logo ? (
-                      <img src={logo} alt={t.name} className="w-7 h-7 object-contain" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
+                      <Image
+                        src={logo}
+                        alt={t.name || t.slug}
+                        width={28}
+                        height={28}
+                        className="w-7 h-7 object-contain"
+                        unoptimized
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
+                      />
                     ) : (
                       <span className="text-orange-500 font-semibold text-lg">{(t.name || t.slug || "?").charAt(0).toUpperCase()}</span>
                     )}
