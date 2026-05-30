@@ -1,5 +1,5 @@
 # Open Rube
-
+ 
 An open-source implementation of [Rube](https://rube.app), empowering AI agents to interact with 500+ applications directly within your chat interface.
 
 ## What is Rube?
